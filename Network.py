@@ -1,49 +1,5 @@
-class Edge:
-    def __init__(self, src, dest, weight):
-        """
-        Constructs an Edge
-        
-        Requires:
-        src and dst Nodes
-        Ensures:
-        Edge such that src == self.getSource(), dest == self.getDestination() 
-        and weight == self.getWeight() 
-        """
-        self._src = src
-        self._dest = dest
-        self._weight = weight
-
-        
-    def getSource(self):
-        """
-        Gets the source Node
-        """
-        return self._src
-
+from copy import deepcopy  
     
-    def getDestination(self):
-        """
-        Gets the destination Node
-        """
-        return self._dest
-
-
-    def getWeight(self):
-        """
-        Gets the edge's weight
-        """
-        return self._weight
-
-
-    def __str__(self):
-        """
-        String representation
-        """
-        return self._src.getName() + '->' + self._dest.getName()
-    
-
-
-
 class Network:
     def __init__(self):
         """
@@ -87,39 +43,77 @@ class Network:
 
         
     def childrenOf(self, node):
-        return self._edges[node]
-
+        return [x[0] for x in self._edges[node]]
+    
     
     def hasNode(self, node):
         return node in self._nodes
-                      
-    
-    #TODO essa função e a outra dentro dela inteiras
-    def getShortestPaths(self, sourceNode, destinationNode):
         
-        def dfs(graph, start, end, path, shortest, results):
-             
-            path = path + [start]
+    
+    def getShortestPaths(self, sourceNode, destinationNode, constraint=3):
+        
+        def isWeightEligible(weight, allPaths):
+            for path in allPaths:
+                if weight < path[1]:
+                    return True
+            return False
+        
+        def heaviestPath(allPaths):
+            heaviest = None
+            for path in allPaths:
+                if heaviest == None:
+                    heaviest = path
+                elif path[1] > heaviest[1]:
+                    heaviest = path
+            return heaviest                
+        
+        def dfs(currentNode, targetNode, path, pathWeight, allPaths, maxPaths):
             
-            if start == end:
-                return path
-            for node in graph.childrenOf(start):
+            path = path + [currentNode]
+            
+            # if the current path has at least 2 nodes, get the edge of the previous node with the current node
+            # and add this edge's weight to pathWeight
+            if len(path) > 1:
+                previousNodeEdges = self._edges[path[-2]]
+                currentEdge = None
+                for edge in previousNodeEdges:
+                    if edge[0] == currentNode:
+                        currentEdge = edge
+                pathWeight += currentEdge[1]
+                         
+            if currentNode == targetNode:
+                return (path, pathWeight)
+            
+            # if reached a childless node which is not the target node
+            elif len(self.childrenOf(currentNode)) == 0:
+                return None
+            
+            for node in self.childrenOf(currentNode):
                 if node not in path:
                     
-                    #TODO condição para checar se o peso do caminho atual ainda é menor que o dos outros já adicionados no results
-                    if shortest == None or : 
-                        newPath = dfs(graph, node, end, path, shortest)
-                        if newPath != None and sorted(newPath) not in [sorted(x) for x in results]:
-                            shortest = newPath
-           
-            return shortest
+                    if len(allPaths) < maxPaths or (len(allPaths) == maxPaths and isWeightEligible(pathWeight, allPaths)):
+                        if len(allPaths) == maxPaths:
+                            allPaths.remove(heaviestPath(allPaths))  
+                         
+                        newPath = (dfs(node, targetNode, path, pathWeight, deepcopy(allPaths), maxPaths))
+                        if newPath != None:
+                            # if newPath is a tuple (i.e. a path found), append it to the list with all the previous paths
+                            if isinstance(newPath, tuple):
+                                allPaths.append(newPath)
+                            else:
+                                allPaths = newPath 
+            return allPaths
 
-        
+        results = dfs(sourceNode, destinationNode, [], 0, [], constraint)
+        results.sort(key = lambda path: path[1])
+        results = [([node.getId() for node in path[0]], path[1]) for path in results]
+        return results
 
+    #TODO ver se essa função aqui printa bem levando em conta o grafo ser não direcionado e ponderado
     def __str__(self):
         result = ''
         for src in self._nodes:
             for dest in self._edges[src]:
                 result = result + src.getName() + '->' + dest.getName() + '\n'
 
-        
+
