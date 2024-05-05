@@ -1,5 +1,5 @@
 from copy import deepcopy  
-    
+
 class Network:
     def __init__(self):
         """
@@ -11,7 +11,7 @@ class Network:
         """
         self._nodes = []
         self._edges = {}
-
+        # self.testcount = 0
         
     def addNode(self, node):
         """
@@ -67,7 +67,9 @@ class Network:
                     heaviest = path
             return heaviest                
         
+        
         def dfs(currentNode, targetNode, path, pathWeight, allPaths, maxPaths):
+            
             
             path = path + [currentNode]
             
@@ -104,7 +106,11 @@ class Network:
                                 allPaths = newPath 
             return allPaths
 
-        results = dfs(sourceNode, destinationNode, [], 0, [], constraint)
+        #TODO ver isso aqui melhor (não sei onde exatamente que é pra guardar a informação de que eles não comunicam)
+        results = dfs(sourceNode, destinationNode, [], 0, [], constraint)        
+        if len(results) == 0:
+            raise Exception(f"{sourceNode.getId()} and {destinationNode.getId()} do not communicate")
+        
         results.sort(key = lambda path: path[1])
         results = [([node.getId() for node in path[0]], path[1]) for path in results]
         return results
