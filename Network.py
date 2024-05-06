@@ -11,8 +11,12 @@ class Network:
         """
         self._nodes = []
         self._edges = {}
-        # self.testcount = 0
         
+    # TODO gets the network from a given file
+    def fromFile(fileName):
+        pass   
+     
+    
     def addNode(self, node):
         """
         Adds a Node
@@ -68,9 +72,7 @@ class Network:
             return heaviest                
         
         
-        def dfs(currentNode, targetNode, path, pathWeight, allPaths, maxPaths):
-            
-            
+        def dfs(currentNode, targetNode, path, pathWeight, allPaths, maxPaths): 
             path = path + [currentNode]
             
             # if the current path has at least 2 nodes, get the edge of the previous node with the current node
@@ -104,16 +106,18 @@ class Network:
                                 allPaths.append(newPath)
                             else:
                                 allPaths = newPath 
+            
             return allPaths
 
         #TODO ver isso aqui melhor (não sei onde exatamente que é pra guardar a informação de que eles não comunicam)
         results = dfs(sourceNode, destinationNode, [], 0, [], constraint)        
         if len(results) == 0:
-            raise Exception(f"{sourceNode.getId()} and {destinationNode.getId()} do not communicate")
+            raise Exception(f"{sourceNode.getName()} and {destinationNode.getName()} do not communicate")
         
         results.sort(key = lambda path: path[1])
-        results = [([node.getId() for node in path[0]], path[1]) for path in results]
+        results = [([node.getName() for node in path[0]], path[1]) for path in results]
         return results
+
 
     #TODO ver se essa função aqui printa bem levando em conta o grafo ser não direcionado e ponderado
     def __str__(self):

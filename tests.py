@@ -70,6 +70,6 @@ def test2():
     result = rede.getShortestPaths(s1, s10)
     print(result)  
     
-    
-#test1()
+
+test1()
 #test2()
