@@ -1,4 +1,5 @@
 from copy import deepcopy  
+from constants import *
 
 class Network:
     def __init__(self):
@@ -35,6 +36,14 @@ class Network:
 
             
     def addEdge(self, edge):
+        """
+        Adds an Edge
+        
+        Requires:
+        edge is Edge not in the graph yet
+        Ensures:
+        
+        """
         src = edge.getSource()
         dest = edge.getDestination()
         weight = edge.getWeight()
@@ -47,7 +56,15 @@ class Network:
 
         
     def childrenOf(self, node):
-        return [x[0] for x in self._edges[node]]
+        """
+        Gives children of a given node.
+        
+        Requires:
+        node is Node already in the graph
+        Ensures:
+        list containing all the children of node
+        """
+        return [x[EDGE_NODE_INDEX] for x in self._edges[node]]
     
     
     def hasNode(self, node):
@@ -55,10 +72,18 @@ class Network:
         
     
     def getShortestPaths(self, sourceNode, destinationNode, constraint=3):
+        """
+        Gives n-shortest paths between two given nodes, where n is given (3 by default)
         
+        Requires:
+        sourceNode, destinationNode Node
+        constraint int
+        Ensures:
+        first n-shortest paths, where n is equal to the given constraint 
+        """
         def isWeightEligible(weight, allPaths):
             for path in allPaths:
-                if weight < path[1]:
+                if weight < path[PATH_WEIGHT_INDEX]:
                     return True
             return False
         
@@ -67,7 +92,7 @@ class Network:
             for path in allPaths:
                 if heaviest == None:
                     heaviest = path
-                elif path[1] > heaviest[1]:
+                elif path[PATH_WEIGHT_INDEX] > heaviest[PATH_WEIGHT_INDEX]:
                     heaviest = path
             return heaviest                
         
@@ -81,9 +106,9 @@ class Network:
                 previousNodeEdges = self._edges[path[-2]]
                 currentEdge = None
                 for edge in previousNodeEdges:
-                    if edge[0] == currentNode:
+                    if edge[EDGE_NODE_INDEX] == currentNode:
                         currentEdge = edge
-                pathWeight += currentEdge[1]
+                pathWeight += currentEdge[EDGE_WEIGHT_INDEX]
                          
             if currentNode == targetNode:
                 return (path, pathWeight)
@@ -93,8 +118,7 @@ class Network:
                 return None
             
             for node in self.childrenOf(currentNode):
-                if node not in path:
-                    
+                if node not in path:  
                     if len(allPaths) < maxPaths or (len(allPaths) == maxPaths and isWeightEligible(pathWeight, allPaths)):
                         if len(allPaths) == maxPaths:
                             allPaths.remove(heaviestPath(allPaths))  
@@ -114,8 +138,8 @@ class Network:
         if len(results) == 0:
             raise Exception(f"{sourceNode.getName()} and {destinationNode.getName()} do not communicate")
         
-        results.sort(key = lambda path: path[1])
-        results = [([node.getName() for node in path[0]], path[1]) for path in results]
+        results.sort(key = lambda path: path[PATH_WEIGHT_INDEX])
+        results = [([node.getName() for node in path[PATH_LIST_INDEX]], path[PATH_WEIGHT_INDEX]) for path in results]
         return results
 
 

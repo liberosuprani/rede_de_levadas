@@ -40,4 +40,4 @@ class Edge:
         """
         String representation
         """
-        return self._src.getName() + '->' + self._dest.getName()
+        return f"{self._src.getName()} <-> {self._dest.getName()} ({self.getWeight()})"

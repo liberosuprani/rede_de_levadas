@@ -4,6 +4,10 @@ class Station:
         self._name = name
         self._neighbors = neighbors
 
+    # TODO gets a station from the info in a file
+    def fromFile():
+        pass
+
 
     def getId(self):
         return self._id
