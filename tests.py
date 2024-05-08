@@ -34,6 +34,11 @@ def test1():
     print("\n-------------------\n")
     result = rede.getShortestPaths(s8, s7)
     print(result)
+    print("\n\n\n")
+    
+    print(s1)
+    print(rede)
+
 
 def test2():
     s1 = Station("A", "Primeira", [("B", 1), ("C", 2), ("H", 5)])
@@ -70,6 +75,6 @@ def test2():
     result = rede.getShortestPaths(s1, s10)
     print(result)  
     
-
+    
 test1()
 #test2()

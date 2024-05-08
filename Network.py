@@ -71,9 +71,20 @@ class Network:
         return node in self._nodes
         
     
+    def getEdgeBewteenNodes(self, node1, node2):
+        if node1 == node2:
+            return (0,0)
+        if node2 not in self.childrenOf(node1):
+            return (0, 0)
+        
+        for child in self._edges[node1]:
+            if child[0] == node2:
+                return child
+    
+    
     def getShortestPaths(self, sourceNode, destinationNode, constraint=3):
         """
-        Gives n-shortest paths between two given nodes, where n is given (3 by default)
+        Gives n-shortest paths between two given nodes, where n is given (3 by default).
         
         Requires:
         sourceNode, destinationNode Node
@@ -81,13 +92,32 @@ class Network:
         Ensures:
         first n-shortest paths, where n is equal to the given constraint 
         """
+        
         def isWeightEligible(weight, allPaths):
+            """
+            Returns whether a given weight is lower than any of the paths
+            in given.
+            
+            Requires:
+            weight int
+            allPaths a list of paths (tuples of (path, weight))
+            Ensures:
+            True if weight is lower than any of the paths, else returns False
+            """
             for path in allPaths:
                 if weight < path[PATH_WEIGHT_INDEX]:
                     return True
             return False
         
         def heaviestPath(allPaths):
+            """
+            Gives the heaviest path in a list of paths.
+            
+            Requires: 
+            allPaths a list of paths (tuples of (path, weight))
+            Ensures:
+            a tuple (path, weight) which is the heaviest path in the allPaths list
+            """
             heaviest = None
             for path in allPaths:
                 if heaviest == None:
@@ -120,9 +150,12 @@ class Network:
             for node in self.childrenOf(currentNode):
                 if node not in path:  
                     if len(allPaths) < maxPaths or (len(allPaths) == maxPaths and isWeightEligible(pathWeight, allPaths)):
+                        
+                        # if the current path is eligible to be added and the allPaths list is already full,
+                        # then remove the heaviest path from allPaths
                         if len(allPaths) == maxPaths:
                             allPaths.remove(heaviestPath(allPaths))  
-                         
+                        
                         newPath = (dfs(node, targetNode, path, pathWeight, deepcopy(allPaths), maxPaths))
                         if newPath != None:
                             # if newPath is a tuple (i.e. a path found), append it to the list with all the previous paths
@@ -143,11 +176,28 @@ class Network:
         return results
 
 
-    #TODO ver se essa função aqui printa bem levando em conta o grafo ser não direcionado e ponderado
+    
     def __str__(self):
-        result = ''
-        for src in self._nodes:
-            for dest in self._edges[src]:
-                result = result + src.getName() + '->' + dest.getName() + '\n'
+        finalStr = "Adjacency Matrix:\n/   "
+        dictKeys = [k for k in self._edges.keys()]
+        nodes = self._nodes
+        
+        for node in nodes:
+            finalStr += f"{node.getId()}   "
+        finalStr += "\n"
+        
+        for row in range(0, len(nodes)):
+            weightToPrint = 0
+            for column in range(-1, len(nodes)):
+                if column == -1:        
+                    finalStr += f"{nodes[row].getId()}   "
+                else:
+                    edge = self.getEdgeBewteenNodes(nodes[row], nodes[column])
+                    weightToPrint = edge[1]
+                    finalStr += f"{weightToPrint}   "
+            finalStr += "\n"
+        return finalStr
+                    
+                
 
 

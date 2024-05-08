@@ -32,3 +32,6 @@ class Station:
     def setNeighbors(self, value):
         self._neighbors = value
 
+
+    def __str__(self):
+        return f"[Id: {self.getId()}, Name: {self.getName()}]"
