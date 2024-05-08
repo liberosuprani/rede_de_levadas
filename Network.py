@@ -15,6 +15,14 @@ class Network:
         
     # TODO gets the network from a given file
     def fromFile(fileName):
+        """
+        Constructs a network from the info in a file.
+        
+        Requires:
+        fileName str
+        Ensures:
+        The synchronization of this network's info with the info from the file given
+        """
         pass   
      
     
@@ -72,6 +80,14 @@ class Network:
         
     
     def getEdgeBewteenNodes(self, node1, node2):
+        """
+        Gives edge between two given nodes
+        
+        Requires:
+        node1, node2 Node
+        Ensures:
+        a tuple, (node1, weightOfTheEdge)  
+        """
         if node1 == node2:
             return (0,0)
         if node2 not in self.childrenOf(node1):
@@ -109,6 +125,7 @@ class Network:
                     return True
             return False
         
+        
         def heaviestPath(allPaths):
             """
             Gives the heaviest path in a list of paths.
@@ -128,6 +145,16 @@ class Network:
         
         
         def dfs(currentNode, targetNode, path, pathWeight, allPaths, maxPaths): 
+            """
+            Gives n-shortest paths between two given nodes, where n is given (3 by default).
+            
+            Requires:
+            currentNode, targetNode Node
+            path, allPaths list
+            pathWeight, maxPaths int
+            Ensures:
+            first n-shortest paths, where n is equal to the given maxPaths 
+            """
             path = path + [currentNode]
             
             # if the current path has at least 2 nodes, get the edge of the previous node with the current node
@@ -176,7 +203,6 @@ class Network:
         return results
 
 
-    
     def __str__(self):
         finalStr = "Adjacency Matrix:\n/   "
         dictKeys = [k for k in self._edges.keys()]

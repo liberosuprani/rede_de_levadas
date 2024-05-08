@@ -5,7 +5,15 @@ class Station:
         self._neighbors = neighbors
 
     # TODO gets a station from the info in a file
-    def fromFile():
+    def fromFile(fileName):
+        """
+        Constructs a station from the info in a file.
+        
+        Requires:
+        fileName str
+        Ensures:
+        The synchronization of this station's info with the info from the file given
+        """
         pass
 
 
