@@ -1,8 +1,10 @@
 class Station:
-    def __init__(self, id, name, neighbors):
+    def __init__(self, id, name, children=[]):
         self._id = id
         self._name = name
-        self._neighbors = neighbors
+        
+        # children é uma lista com tuplos (nóFilho, distância)
+        self._children = children
 
     # TODO gets a station from the info in a file
     def fromFile(fileName):
@@ -33,12 +35,12 @@ class Station:
         self._name = value
 
 
-    def getNeighbors(self):
-        return self._neighbors
+    def getChildren(self):
+        return self._children
 
 
-    def setNeighbors(self, value):
-        self._neighbors = value
+    def setChildren(self, value):
+        self._children = value
 
 
     def __str__(self):

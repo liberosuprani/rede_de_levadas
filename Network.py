@@ -1,5 +1,7 @@
 from copy import deepcopy  
 from constants import *
+from Station import Station
+from Edge import Edge
 
 class Network:
     def __init__(self):
@@ -13,18 +15,16 @@ class Network:
         self._nodes = []
         self._edges = {}
         
-    # TODO gets the network from a given file
-    def fromFile(fileName):
-        """
-        Constructs a network from the info in a file.
         
-        Requires:
-        fileName str
-        Ensures:
-        The synchronization of this network's info with the info from the file given
-        """
-        pass   
-     
+    def fromStationsList(self, stations):
+        for station in stations:
+            self.addNode(station)
+        for station in self._nodes:
+            children = station.getChildren()
+            for child in children:
+                edge = Edge(station, child[0], child[1])
+                self.addEdge(edge)
+    
     
     def addNode(self, node):
         """
@@ -59,8 +59,9 @@ class Network:
         if not(src in self._nodes and dest in self._nodes):
             raise ValueError('Node not in graph')
         
-        self._edges[src].append((dest, weight))
-        self._edges[dest].append((src, weight))
+        if (edge.getSource(), edge.getWeight()) not in self._edges[edge.getDestination()]:
+            self._edges[src].append((dest, weight))
+            self._edges[dest].append((src, weight))
 
         
     def childrenOf(self, node):

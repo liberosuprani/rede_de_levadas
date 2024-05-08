@@ -36,6 +36,12 @@ class Edge:
         return self._weight
 
 
+    def __eq__(self, o):
+        if self.getDestination() == o.getDestination() and self.getSource() == o.getSource() and self.getWeight() == o.getWeight():
+            return True
+        return False
+
+
     def __str__(self):
         """
         String representation
