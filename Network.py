@@ -17,6 +17,14 @@ class Network:
         
         
     def fromStationsList(self, stations):
+        """
+        Syncs the info with a given list of stations.
+
+        Requires: 
+        stations a list
+        Ensures:
+        ...
+        """
         for station in stations:
             self.addNode(station)
         for station in self._nodes:
@@ -59,6 +67,7 @@ class Network:
         if not(src in self._nodes and dest in self._nodes):
             raise ValueError('Node not in graph')
         
+        # if this edge does not exist yet, then add it to self._edges
         if (edge.getSource(), edge.getWeight()) not in self._edges[edge.getDestination()]:
             self._edges[src].append((dest, weight))
             self._edges[dest].append((src, weight))
@@ -113,7 +122,7 @@ class Network:
         def isWeightEligible(weight, allPaths):
             """
             Returns whether a given weight is lower than any of the paths
-            in given.
+            in given, i.e. it can be added to the list.
             
             Requires:
             weight int
