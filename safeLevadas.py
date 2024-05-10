@@ -9,7 +9,7 @@ def main(levadasNetworkFile, myStationsFile):
     stations = estacoes do levadasNetworkFile
     caminhosAVerificar = caminhos do myStationsFile
 
-    etc
+    etc123
     """
 
     levadasNetwork = Network()
