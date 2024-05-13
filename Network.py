@@ -16,6 +16,75 @@ class Network:
         self._edges = {}
         
         
+    def fromFile(self, ficheiro_entrada):
+        '''
+        reads the nodes/stations
+        
+        Requires:
+        the name of the files
+        
+        Ensures:
+        The list of lists, with the data of each node/station
+        '''
+        out_lists = []
+        d = {}
+        
+        with open(ficheiro_entrada, 'r', encoding='utf-8') as arquivo_entrada:
+            linhas = arquivo_entrada.readlines()
+            linhas = linhas[1:]
+            
+            
+            for linha in linhas:
+                # retira a quebra de página caso haja
+                if '\n' in linha:
+                    linha = linha[:-1]
+                
+                # retira os parenteses retos e normais juntamente com os espaços    
+                linha = linha.replace('[', '').replace(']', '').strip()
+                linha = linha.replace('(', '').replace(')', '').strip()
+                
+                id, name = linha.split(', ')[0:2]
+                connected = linha.split(', ')[2:]
+                
+                # faz 2 listas, uma com os caminhos e outra com as distancias
+                l1_id_path = connected[::2]
+                l2_path_duration = connected[1::2]
+                
+                # junta tudo numa lista de tuplas de 2 
+                connected = list(zip(l1_id_path, map(int, l2_path_duration)))
+                station = [id, name, connected]
+                out_lists.append(station)
+            
+            
+            # atribui a lista de listas "out_lists" para uma lista de classes "out_list_class"
+            for lista in out_lists:
+                node = Station(lista[0], lista[1], lista[2])
+                d[lista[0]] = node
+                self.addNode(node)
+            
+            
+            # corre um dicionário que tem os IDs como keys, e cada key tem um objeto do tipo Statio 
+            for key in d.keys():
+                
+                # vai tirar a lista de tuplos do objeto do dicionário atraves da chave
+                connections = d[key].getChildren()
+                
+                # vai correr a certa lista de tuplos de cada objeto do dicionário
+                for connection in connections:
+                    
+                    # vai associar o id que está tuplo[0]
+                    dest_key = connection[0]
+                    
+                    # vai associar o objeto ao id do tuplo (que tmabém é chave)
+                    dest = d[dest_key]
+                    
+                    # distancia que está em tuplo[1]
+                    dist = connection[1]
+                    
+                    # junta tudo em edge
+                    self.addEdge(Edge(d[key], dest, dist))
+    
+    
     def fromStationsList(self, stations):
         """
         Syncs the info with a given list of stations.

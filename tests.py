@@ -121,8 +121,14 @@ def test3():
     print(s1, end="\n\n")
     print(rede)
     print("--------------------")
+
+def test4():
+    n = Network()
+    n.fromFile('ficheiros_entrada/testeLevadas.txt')
+    print(n)
     
-test1()
+    
+test4()
 #test2()
 #test3()
 

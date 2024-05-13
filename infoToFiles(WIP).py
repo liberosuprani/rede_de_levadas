@@ -46,12 +46,14 @@ test = [
     (['Oitava', 'Sétima'], 4), 
     (['Oitava', 'Primeira', 'Terceira', 'Sétima'], 11),
     (['Oitava', 'Primeira', 'Segunda', 'Quinta', 'Sétima'], 18)
-    ]
+    ],
     
     # TODO, em caso da estações não comunicarem:
-    # (escreve aqui no teste o resultado pra poder fazer o if na função)
+    # lista vazia
+    [
+    ]
     
     
     # TODO, em caso de uma das estações do par não tiver no sistema:
-    # (escreve aqui no teste o resultado pra poder fazer o if na função)
+    # ()
 ]
