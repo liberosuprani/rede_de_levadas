@@ -4,7 +4,7 @@ class Edge:
         Constructs an Edge
         
         Requires:
-        src and dst Nodes
+        src and dst Station
         weight int
         Ensures:
         Edge such that src == self.getSource(), dest == self.getDestination() 
@@ -17,14 +17,14 @@ class Edge:
         
     def getSource(self):
         """
-        Gets the source Node
+        Gets the source Station
         """
         return self._src
 
     
     def getDestination(self):
         """
-        Gets the destination Node
+        Gets the destination Station
         """
         return self._dest
 

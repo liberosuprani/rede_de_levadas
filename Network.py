@@ -159,7 +159,7 @@ class Network:
             Gives n-shortest paths between two given nodes, where n is given (3 by default).
             
             Requires:
-            currentNode, targetNode Node
+            currentNode, targetNode Station
             path, allPaths list
             pathWeight, maxPaths int
             Ensures:
