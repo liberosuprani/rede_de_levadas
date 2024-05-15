@@ -69,10 +69,10 @@ def test2():
     rede.addEdge(Edge(s8, s7, 4))
     rede.addEdge(Edge(s9, s10, 4))
     
-    result = rede.getShortestPaths(s2, s3)
-    print(result)   
-    # result = rede.getShortestPaths(s1, s10)
-    # print(result)  
+    #result = rede.getShortestPaths(s8, s9)
+    #print(result)   
+    result = rede.getShortestPaths(s1, s10)
+    print(result)  
     
 def test3():
     s1 = Station("A", "Primeira")
@@ -121,24 +121,14 @@ def test3():
     print(s1, end="\n\n")
     print(rede)
     print("--------------------")
-<<<<<<< HEAD
 
 def test4():
     n = Network()
     n.fromFile('ficheiros_entrada/testeLevadas.txt')
-    
     print(n)
     
     
-<<<<<<< Updated upstream
-=======
-#test4()
-test2()
-=======
-    
->>>>>>> Stashed changes
 test1()
 #test2()
->>>>>>> parent of 4460622 (stationsFromFile feito)
 #test3()
 

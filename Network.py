@@ -6,7 +6,7 @@ from Edge import Edge
 class Network:
     def __init__(self):
         """
-        Constructs a Network
+        Constructs a Weighted Graph
         
         Ensures:
         empty graph, i.e.
@@ -16,8 +16,7 @@ class Network:
         self._edges = {}
         
         
-<<<<<<< HEAD
-    def fromFile(self, fileName):
+    def fromFile(self, ficheiro_entrada):
         '''
         reads the nodes/stations
         
@@ -27,43 +26,65 @@ class Network:
         Ensures:
         The list of lists, with the data of each node/station
         '''
-        tempStationsList = []
-        stationsDictionary = {}
+        out_lists = []
+        d = {}
         
-        with open(fileName, 'r', encoding='utf-8') as f:
-            lines = f.readlines()
-            lines = lines[1:]
+        with open(ficheiro_entrada, 'r', encoding='utf-8') as arquivo_entrada:
+            linhas = arquivo_entrada.readlines()
+            linhas = linhas[1:]
             
-            for line in lines:
-                   
-                line = line.replace('[', '').replace(']', '').strip()
-                line = line.replace('(', '').replace(')', '').strip()
-                line = line.split(", ")
+            
+            for linha in linhas:
+                # retira a quebra de página caso haja
+                if '\n' in linha:
+                    linha = linha[:-1]
                 
-                tempStation = (
-                            line[0], 
-                            line[1], 
-                            [(line[i], int(line[i+1])) for i in range(2, len(line)-1, 2)]
-                          )
-                tempStationsList.append(tempStation)
+                # retira os parenteses retos e normais juntamente com os espaços    
+                linha = linha.replace('[', '').replace(']', '').strip()
+                linha = linha.replace('(', '').replace(')', '').strip()
+                
+                id, name = linha.split(', ')[0:2]
+                connected = linha.split(', ')[2:]
+                
+                # faz 2 listas, uma com os caminhos e outra com as distancias
+                l1_id_path = connected[::2]
+                l2_path_duration = connected[1::2]
+                
+                # junta tudo numa lista de tuplas de 2 
+                connected = list(zip(l1_id_path, map(int, l2_path_duration)))
+                station = [id, name, connected]
+                out_lists.append(station)
             
-            for currentStation in tempStationsList:
-                node = Station(currentStation[0], currentStation[1], currentStation[2])
-                stationsDictionary[currentStation[0]] = node
+            
+            # atribui a lista de listas "out_lists" para uma lista de classes "out_list_class"
+            for lista in out_lists:
+                node = Station(lista[0], lista[1], lista[2])
+                d[lista[0]] = node
                 self.addNode(node)
             
-            for key in stationsDictionary.keys():
-                children = stationsDictionary[key].getChildren()
+            
+            # corre um dicionário que tem os IDs como keys, e cada key tem um objeto do tipo Statio 
+            for key in d.keys():
                 
-                for child in children:
-                    dest_key = child[0]
-                    dest = stationsDictionary[dest_key]
-                    distance = child[1]
-                    self.addEdge(Edge(stationsDictionary[key], dest, distance))
+                # vai tirar a lista de tuplos do objeto do dicionário atraves da chave
+                connections = d[key].getChildren()
+                
+                # vai correr a certa lista de tuplos de cada objeto do dicionário
+                for connection in connections:
+                    
+                    # vai associar o id que está tuplo[0]
+                    dest_key = connection[0]
+                    
+                    # vai associar o objeto ao id do tuplo (que tmabém é chave)
+                    dest = d[dest_key]
+                    
+                    # distancia que está em tuplo[1]
+                    dist = connection[1]
+                    
+                    # junta tudo em edge
+                    self.addEdge(Edge(d[key], dest, dist))
     
     
-=======
->>>>>>> parent of 4460622 (stationsFromFile feito)
     def fromStationsList(self, stations):
         """
         Syncs the info with a given list of stations.
@@ -133,17 +154,9 @@ class Network:
         return [x[EDGE_NODE_INDEX] for x in self._edges[node]]
     
     
-    def hasNode(self, node=None, nodeName=None):
-        if node != None:
-            return node in self._nodes
-        elif nodeName != None:
-            for currentNode in self._nodes:
-                if currentNode.getName() == nodeName:
-                    return True
-            return False
-        else:
-            raise Exception("No arguments were provided")
-    
+    def hasNode(self, node):
+        return node in self._nodes
+        
     
     def getEdgeBewteenNodes(self, node1, node2):
         """
@@ -162,12 +175,6 @@ class Network:
         for child in self._edges[node1]:
             if child[0] == node2:
                 return child
-    
-    
-    def getNodeFromName(self, nodeName):
-        for node in self._nodes:
-            if node.getName() == nodeName:
-                return node
     
     
     def getShortestPaths(self, sourceNode, destinationNode, constraint=3):
@@ -241,7 +248,6 @@ class Network:
                          
             if currentNode == targetNode:
                 return (path, pathWeight)
-                
             
             # if reached a childless node which is not the target node
             elif len(self.childrenOf(currentNode)) == 0:
@@ -251,23 +257,25 @@ class Network:
                 if node not in path:  
                     if len(allPaths) < maxPaths or (len(allPaths) == maxPaths and isWeightEligible(pathWeight, allPaths)):
                         
-                        # recursion
+                        # if the current path is eligible to be added and the allPaths list is already full,
+                        # then remove the heaviest path from allPaths
+                        if len(allPaths) == maxPaths:
+                            allPaths.remove(heaviestPath(allPaths))  
+                        
                         newPath = (dfs(node, targetNode, path, pathWeight, deepcopy(allPaths), maxPaths))
                         if newPath != None:
-                            # if newPath is a tuple (i.e. a path found)
+                            # if newPath is a tuple (i.e. a path found), append it to the list with all the previous paths
                             if isinstance(newPath, tuple):
-                                # check whether amount of paths found until now is lower than constraint or, in case it isn't, if weight is eligible to be added 
-                                if len(allPaths) < maxPaths or (len(allPaths) == maxPaths and isWeightEligible(newPath[1], allPaths)):
-                                    if len(allPaths) == maxPaths:
-                                        allPaths.remove(heaviestPath(allPaths))  
-                                    allPaths.append(newPath)
+                                allPaths.append(newPath)
                             else:
                                 allPaths = newPath 
+            
             return allPaths
 
+        #TODO ver isso aqui melhor (não sei onde exatamente que é pra guardar a informação de que eles não comunicam)
         results = dfs(sourceNode, destinationNode, [], 0, [], constraint)        
         if len(results) == 0:
-            return f"{sourceNode.getName()} and {destinationNode.getName()} do not communicate"
+            raise Exception(f"{sourceNode.getName()} and {destinationNode.getName()} do not communicate")
         
         results.sort(key = lambda path: path[PATH_WEIGHT_INDEX])
         results = [([node.getName() for node in path[PATH_LIST_INDEX]], path[PATH_WEIGHT_INDEX]) for path in results]
@@ -294,3 +302,7 @@ class Network:
                     finalStr += f"{weightToPrint}   "
             finalStr += "\n"
         return finalStr
+                    
+                
+
+
