@@ -2,4 +2,5 @@
 A, Seixal, [(R, 15), (M, 8), (B, 12)]
 C, Pico Ruivo, [(GJ, 32), (I, 5)]
 D, Queimadas, [(Z, 18), (AC, 11)]
+L, Madeira, [(L, 34)]
 E, Ponta do Pargo, [(DW, 13)]

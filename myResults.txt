@@ -1,0 +1,12 @@
+# Primeira - Décima
+Primeira and Décima do not communicate
+# Nona - Décima
+4, Nona, Décima
+# Centésima - Décima
+Centésima out of the network
+# Centésima - Milésima
+Centésima and Milésima out of the network
+# Segunda - Terceira
+3, Segunda, Primeira, Terceira
+14, Segunda, Primeira, Oitava, Sétima, Terceira
+16, Segunda, Quarta, Sexta, Sétima, Terceira
