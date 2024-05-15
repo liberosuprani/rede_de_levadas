@@ -19,7 +19,7 @@ def readPaths(ficheiro_entrada):
             print(linha)
             out.append(nomes)
     return out
-
+print(readPaths('ficheiros_entrada/myStations.txt'))
 
 
 # TODO falta fazer toda essa função

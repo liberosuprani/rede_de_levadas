@@ -1,0 +1,5 @@
+# Cedro - Queimada
+76, Cedro, Queimada
+83, Cedro, Rabacal, Queimada
+120, Cedro, Ponta do Sol, Areeiro, Queimada
+# Ponta do Pargo - Calheta
