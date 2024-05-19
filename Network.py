@@ -292,6 +292,7 @@ class Network:
                          
             if currentNode == targetNode:
                 return (path, pathWeight)
+                
             
             # if reached a childless node which is not the target node
             elif len(self.childrenOf(currentNode)) == 0:
@@ -301,19 +302,18 @@ class Network:
                 if node not in path:  
                     if len(allPaths) < maxPaths or (len(allPaths) == maxPaths and isWeightEligible(pathWeight, allPaths)):
                         
-                        # if the current path is eligible to be added and the allPaths list is already full,
-                        # then remove the heaviest path from allPaths
-                        if len(allPaths) == maxPaths:
-                            allPaths.remove(heaviestPath(allPaths))  
-                        
+                        # recursion
                         newPath = (dfs(node, targetNode, path, pathWeight, deepcopy(allPaths), maxPaths))
                         if newPath != None:
-                            # if newPath is a tuple (i.e. a path found), append it to the list with all the previous paths
+                            # if newPath is a tuple (i.e. a path found)
                             if isinstance(newPath, tuple):
-                                allPaths.append(newPath)
+                                # check whether amount of paths found until now is lower than constraint or, in case it isn't, if weight is eligible to be added 
+                                if len(allPaths) < maxPaths or (len(allPaths) == maxPaths and isWeightEligible(newPath[1], allPaths)):
+                                    if len(allPaths) == maxPaths:
+                                        allPaths.remove(heaviestPath(allPaths))  
+                                    allPaths.append(newPath)
                             else:
                                 allPaths = newPath 
-            
             return allPaths
     
 
