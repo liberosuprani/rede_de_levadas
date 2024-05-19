@@ -1,3 +1,10 @@
+#-*- coding: utf-8 -*-
+
+# 2023-2024 Programação 2 (LTI)
+# Grupo 143
+# 62220 Libero Suprani 
+# 62239 Lourenço Lima
+
 class Station:
     def __init__(self, id, name, children=[]):
         self._id = id

@@ -1,3 +1,10 @@
+#-*- coding: utf-8 -*-
+
+# 2023-2024 Programação 2 (LTI)
+# Grupo 143
+# 62220 Libero Suprani 
+# 62239 Lourenço Lima
+
 from copy import deepcopy  
 from constants import *
 from Station import Station
@@ -24,7 +31,7 @@ class Network:
         the name of the files
         
         Ensures:
-        The list of lists, with the data of each node/station
+        The dictinary of stations, with the data of each node/station
         '''
         out_lists = []
         d = {}
@@ -63,7 +70,7 @@ class Network:
                 self.addNode(node)
             
             
-            # corre um dicionário que tem os IDs como keys, e cada key tem um objeto do tipo Statio 
+            # corre um dicionário que tem os IDs como keys, e cada key tem um objeto do tipo Station
             for key in d.keys():
                 
                 # vai tirar a lista de tuplos do objeto do dicionário atraves da chave
@@ -82,7 +89,44 @@ class Network:
                     dist = connection[1]
                     
                     # junta tudo em edge
-                    self.addEdge(Edge(d[key], dest, dist))
+                    self.addEdge(Edge(d[key], dest, dist))        
+        return d
+    
+    
+    def writeFile(self, lista_estacao, lista_3_melhores, nome_arquivo):
+        
+        """
+        This function writes the lists in the .txt files
+        
+        Requires:
+        a list of lists with the pretended paths
+        a list of lists with the best ways
+        a name for the arquive name
+        
+        Ensures:
+        a .txt file
+        """
+        
+        with open(nome_arquivo, 'w', encoding='utf-8') as arquivo:
+            
+            for par_estacoes, sublistas in zip(lista_estacao, lista_3_melhores):
+                
+                arquivo.write(f'# {par_estacoes[0]} - {par_estacoes[1]}\n')
+                
+                if not sublistas:
+                    arquivo.write(f"{par_estacoes[0]} and {par_estacoes[1]} do not communicate\n")    
+                else:
+                    for items in sublistas:
+                        if '0OUT_OF_NETWORK' in sublistas and '1OUT_OF_NETWORK' in sublistas:
+                            arquivo.write(f"{par_estacoes[0]} and {par_estacoes[1]} are out of network\n")
+                            break
+                        elif '0OUT_OF_NETWORK' in sublistas:
+                            arquivo.write(f"{par_estacoes[0]} is out of network\n")
+                        elif '1OUT_OF_NETWORK' in sublistas:
+                            arquivo.write(f"{par_estacoes[1]} is out of network\n")
+                        else:
+                            formatada = ", ".join(items[0])
+                            arquivo.write(f"{items[1]}, {formatada}\n")
     
     
     def fromStationsList(self, stations):
@@ -271,16 +315,17 @@ class Network:
                                 allPaths = newPath 
             
             return allPaths
+    
 
         #TODO ver isso aqui melhor (não sei onde exatamente que é pra guardar a informação de que eles não comunicam)
         results = dfs(sourceNode, destinationNode, [], 0, [], constraint)        
-        if len(results) == 0:
-            raise Exception(f"{sourceNode.getName()} and {destinationNode.getName()} do not communicate")
+        #if len(results) == 0:
+            #raise Exception(f"{sourceNode.getName()} and {destinationNode.getName()} do not communicate")
         
         results.sort(key = lambda path: path[PATH_WEIGHT_INDEX])
         results = [([node.getName() for node in path[PATH_LIST_INDEX]], path[PATH_WEIGHT_INDEX]) for path in results]
         return results
-
+        
 
     def __str__(self):
         finalStr = "Adjacency Matrix:\n/   "
