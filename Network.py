@@ -117,9 +117,8 @@ class Network:
                     arquivo.write(f"{par_estacoes[0]} and {par_estacoes[1]} do not communicate\n")    
                 else:
                     for items in sublistas:
-                        if '0OUT_OF_NETWORK' in sublistas and '1OUT_OF_NETWORK' in sublistas:
+                        if 'BOTH_OUT_OF_NETWORK' in sublistas:
                             arquivo.write(f"{par_estacoes[0]} and {par_estacoes[1]} are out of network\n")
-                            break
                         elif '0OUT_OF_NETWORK' in sublistas:
                             arquivo.write(f"{par_estacoes[0]} is out of network\n")
                         elif '1OUT_OF_NETWORK' in sublistas:

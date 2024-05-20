@@ -65,6 +65,10 @@ def merge_paths(shortest, paths_with_numbers):
     """
     
     for i, sublist in enumerate(paths_with_numbers):
+        
+        if 'BOTH_OUT_OF_NETWORK' in sublist:
+            shortest.insert(i, sublist)
+        
         if '0OUT_OF_NETWORK' in sublist or '1OUT_OF_NETWORK' in sublist:
             shortest.insert(i, sublist)
     
@@ -102,6 +106,11 @@ def main(stationsINPUT, wanted_pathsINTPUT, output):
     wanted_path = Edge.fromFileEdges(wanted_pathsINTPUT)
     
     paths, possiblePaths = calcPaths(networkDic, wanted_path)
+
+    for i, sublist5 in enumerate(paths):
+        if '0OUT_OF_NETWORK' in sublist5 and '1OUT_OF_NETWORK' in sublist5:
+            out = 'BOTH_OUT_OF_NETWORK'
+            paths[i] = [out]
 
     finalList = []
     for sublist4 in possiblePaths:

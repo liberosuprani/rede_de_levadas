@@ -56,6 +56,10 @@ def merge_paths(shortest, paths_with_numbers):
     """
     
     for i, sublist in enumerate(paths_with_numbers):
+        
+        if 'BOTH_OUT_OF_NETWORK' in sublist:
+            shortest.insert(i, sublist)
+        
         if '0OUT_OF_NETWORK' in sublist or '1OUT_OF_NETWORK' in sublist:
             shortest.insert(i, sublist)
     
@@ -203,6 +207,11 @@ def test4():
     wanted_path = Edge.fromFileEdges('ficheiros_entrada/wantedPathsTESTE.txt')
     
     paths, possiblePaths = calcPaths(networkDic, wanted_path)
+    
+    for i, sublist5 in enumerate(paths):
+        if '0OUT_OF_NETWORK' in sublist5 and '1OUT_OF_NETWORK' in sublist5:
+            out = 'BOTH_OUT_OF_NETWORK'
+            paths[i] = [out]
 
     finalList = []
     for sublist4 in possiblePaths:
@@ -210,7 +219,11 @@ def test4():
         finalList.append(pathList)
     
     merged_final = merge_paths(finalList, paths)
-    n.writeFile(wanted_path, merged_final, 'ficheiros_saida/TESTE.txt') 
+    
+    print(len(merged_final))
+    
+    n.writeFile(wanted_path, merged_final, 'ficheiros_saida/TESTE.txt')
+    
 test4()
 
 #python safeLevadas.py ficheiros_entrada/stationsTESTE.txt ficheiros_entrada/wantedPathsTESTE.txt ficheiros_saida/outputTESTE.txt
