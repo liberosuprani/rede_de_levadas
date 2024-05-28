@@ -1,352 +1,307 @@
-#-*- coding: utf-8 -*-
-
-# 2023-2024 Programação 2 (LTI)
-# Grupo 143
-# 62220 Libero Suprani 
-# 62239 Lourenço Lima
-
 from copy import deepcopy  
 from constants import *
 from Station import Station
-from Edge import Edge
+from Levada import Levada
 
 class Network:
     def __init__(self):
         """
-        Constructs a Weighted Graph
+        Constructs a Network
         
         Ensures:
         empty graph, i.e.
-        graph such that [] == self.getNodes() and {} == self.getEdges() 
+        graph such that [] == self.getStations() and {} == self.getLevadas() 
         """
-        self._nodes = []
-        self._edges = {}
+        self._stations = []
+        self._levadas = {}
         
+    def getStations(self):
+        return self._stations
+    
+    def getLevadas(self):
+        return self._levadas
+    
         
-    def fromFile(self, ficheiro_entrada):
+    def fromFile(self, fileName):
         '''
-        reads the nodes/stations
+        Reads the stations from a file whose name is fileName
         
         Requires:
-        the name of the files
+        fileName str
         
         Ensures:
-        The dictinary of stations, with the data of each node/station
+        Data of this network is now according to the data in the file
         '''
-        out_lists = []
-        d = {}
+        stationsDictionary = {}
         
-        with open(ficheiro_entrada, 'r', encoding='utf-8') as arquivo_entrada:
-            linhas = arquivo_entrada.readlines()
-            linhas = linhas[1:]
+        with open(fileName, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+            lines = lines[1:]
             
-            
-            for linha in linhas:
-                # retira a quebra de página caso haja
-                if '\n' in linha:
-                    linha = linha[:-1]
+            for line in lines:
+                # removes all the non important characters (parenthesis, brackets and commas)
+                line = line.replace('[', '').replace(']', '').strip()
+                line = line.replace('(', '').replace(')', '').strip()
+                line = line.split(", ")
                 
-                # retira os parenteses retos e normais juntamente com os espaços    
-                linha = linha.replace('[', '').replace(']', '').strip()
-                linha = linha.replace('(', '').replace(')', '').strip()
+                # temporary variable for a station
+                tempStation = (
+                            line[0], 
+                            line[1], 
+                            [ (line[i], int(line[i+1])) for i in range(2, len(line)-1, 2) ]
+                          )
                 
-                id, name = linha.split(', ')[0:2]
-                connected = linha.split(', ')[2:]
+                # creates a station with empty children for now, and adds it to the network 
+                station = Station(tempStation[0], tempStation[1], [])
+                self.addStation(station)
                 
-                # faz 2 listas, uma com os caminhos e outra com as distancias
-                l1_id_path = connected[::2]
-                l2_path_duration = connected[1::2]
-                
-                # junta tudo numa lista de tuplas de 2 
-                connected = list(zip(l1_id_path, map(int, l2_path_duration)))
-                station = [id, name, connected]
-                out_lists.append(station)
-            
-            
-            # atribui a lista de listas "out_lists" para uma lista de classes "out_list_class"
-            for lista in out_lists:
-                node = Station(lista[0], lista[1], lista[2])
-                d[lista[0]] = node
-                self.addNode(node)
-            
-            
-            # corre um dicionário que tem os IDs como keys, e cada key tem um objeto do tipo Station
-            for key in d.keys():
-                
-                # vai tirar a lista de tuplos do objeto do dicionário atraves da chave
-                connections = d[key].getChildren()
-                
-                # vai correr a certa lista de tuplos de cada objeto do dicionário
-                for connection in connections:
-                    
-                    # vai associar o id que está tuplo[0]
-                    dest_key = connection[0]
-                    
-                    # vai associar o objeto ao id do tuplo (que tmabém é chave)
-                    dest = d[dest_key]
-                    
-                    # distancia que está em tuplo[1]
-                    dist = connection[1]
-                    
-                    # junta tudo em edge
-                    self.addEdge(Edge(d[key], dest, dist))        
-        return d
-    
-    
-    def writeFile(self, lista_estacao, lista_3_melhores, nome_arquivo):
+                # dictionary key is the ID of a station, and the value is a tuple (stationObject, listOfChildrenToBeAdded)
+                stationsDictionary[tempStation[0]] = (station, tempStation[2])
         
+            for currentID in stationsDictionary.keys():
+                
+                currentStation = stationsDictionary[currentID][0]
+                currentChildren = stationsDictionary[currentID][1]
+                
+                # goes through the list of tuples, with the levadas to be added
+                for child in currentChildren:
+                    destinationID = child[LEVADA_NODE_INDEX]
+                    distance = child[LEVADA_WEIGHT_INDEX]
+                    
+                    # gets the station Object from its ID key in the dictionary
+                    destinationStation = stationsDictionary[destinationID][0]
+                    
+                    self.addLevada(Levada(currentStation, destinationStation, distance))
+                
+            
+    def addStation(self, station):
         """
-        This function writes the lists in the .txt files
+        Adds a station
         
         Requires:
-        a list of lists with the pretended paths
-        a list of lists with the best ways
-        a name for the arquive name
-        
+        station is station not in the graph yet
         Ensures:
-        a .txt file
+        getNodes() == getNodes()@pre.append(station)
+        getLevadas[station] == [] 
         """
-        
-        with open(nome_arquivo, 'w', encoding='utf-8') as arquivo:
-            
-            for par_estacoes, sublistas in zip(lista_estacao, lista_3_melhores):
-                
-                arquivo.write(f'# {par_estacoes[0]} - {par_estacoes[1]}\n')
-                
-                if not sublistas:
-                    arquivo.write(f"{par_estacoes[0]} and {par_estacoes[1]} do not communicate\n")    
-                else:
-                    for items in sublistas:
-                        if 'BOTH_OUT_OF_NETWORK' in sublistas:
-                            arquivo.write(f"{par_estacoes[0]} and {par_estacoes[1]} are out of network\n")
-                        elif '0OUT_OF_NETWORK' in sublistas:
-                            arquivo.write(f"{par_estacoes[0]} is out of network\n")
-                        elif '1OUT_OF_NETWORK' in sublistas:
-                            arquivo.write(f"{par_estacoes[1]} is out of network\n")
-                        else:
-                            formatada = ", ".join(items[0])
-                            arquivo.write(f"{items[1]}, {formatada}\n")
-    
-    
-    def fromStationsList(self, stations):
-        """
-        Syncs the info with a given list of stations.
-
-        Requires: 
-        stations a list
-        Ensures:
-        ...
-        """
-        for station in stations:
-            self.addNode(station)
-        for station in self._nodes:
-            children = station.getChildren()
-            for child in children:
-                edge = Edge(station, child[0], child[1])
-                self.addEdge(edge)
-    
-    
-    def addNode(self, node):
-        """
-        Adds a Node
-        
-        Requires:
-        node is Node not in the graph yet
-        Ensures:
-        getNodes() == getNodes()@pre.append(node)
-        getEdges[node] == [] 
-        """
-        if node in self._nodes:
-            raise ValueError('Duplicate node')
+        if station in self._stations:
+            raise ValueError('Duplicate station')
         else:
-            self._nodes.append(node)
-            self._edges[node] = []
+            self._stations.append(station)
+            self._levadas[station] = []
 
             
-    def addEdge(self, edge):
+    def addLevada(self, levada):
         """
-        Adds an Edge
+        Adds a Levada
         
         Requires:
-        edge is Edge not in the graph yet
+        levada is Levada not in the graph yet
         Ensures:
         
         """
-        src = edge.getSource()
-        dest = edge.getDestination()
-        weight = edge.getWeight()
+        src = levada.getSource()
+        dest = levada.getDestination()
+        weight = levada.getWeight()
         
-        if not(src in self._nodes and dest in self._nodes):
-            raise ValueError('Node not in graph')
+        if not(src in self._stations and dest in self._stations):
+            raise Exception('Stations not in network')
         
-        # if this edge does not exist yet, then add it to self._edges
-        if (edge.getSource(), edge.getWeight()) not in self._edges[edge.getDestination()]:
-            self._edges[src].append((dest, weight))
-            self._edges[dest].append((src, weight))
+        # if this levada does not exist yet, then add it to self._levadas
+        if (dest, weight) not in self._levadas[src]:
+            
+            for currentLevada in self._levadas[src]:
+                # there is already another levada with the same destination station, but different weight
+                if currentLevada[LEVADA_NODE_INDEX] == dest and currentLevada[LEVADA_WEIGHT_INDEX] != weight:
+                    raise Exception(f"Two levadas with same source station and different weights ({Levada(src, dest, currentLevada[LEVADA_WEIGHT_INDEX])}) and ({levada})")
+            
+            self._levadas[src].append((dest, weight))
+            self._levadas[dest].append((src, weight))
 
         
-    def childrenOf(self, node):
+    def childrenOf(self, station):
         """
-        Gives children of a given node.
+        Gives children of a given station.
         
         Requires:
-        node is Node already in the graph
+        station is station already in the network
         Ensures:
-        list containing all the children of node
+        list containing all the children of station
         """
-        return [x[EDGE_NODE_INDEX] for x in self._edges[node]]
+        return [x[LEVADA_NODE_INDEX] for x in self._levadas[station]]
     
     
-    def hasNode(self, node):
-        return node in self._nodes
-        
-    
-    def getEdgeBewteenNodes(self, node1, node2):
+    def hasStation(self, station=None, stationName=None):
         """
-        Gives edge between two given nodes
+        Returns whether a station exists or not in the network.
         
         Requires:
-        node1, node2 Node
+        station Station (default value = None)
+        stationName str (default value = None)
+        
         Ensures:
-        a tuple, (node1, weightOfTheEdge)  
+        true if station exists in the network,
+        false in case it doesn't
         """
-        if node1 == node2:
+        
+        if station != None:
+            return station in self._stations
+        elif stationName != None:
+            for currentStation in self._stations:
+                if currentStation.getName() == stationName:
+                    return True
+            return False
+        else:
+            raise Exception("No arguments were provided")
+    
+    
+    def getLevadaBetweenStations(self, station1, station2):
+        """
+        Gives levada between two given stations
+        
+        Requires:
+        station1, station2 Station
+        
+        Ensures:
+        a tuple, (node1, weightOfTheLevada)  
+        """
+        if station1 == station2:
             return (0,0)
-        if node2 not in self.childrenOf(node1):
+        if station2 not in self.childrenOf(station1):
             return (0, 0)
         
-        for child in self._edges[node1]:
-            if child[0] == node2:
+        for child in self._levadas[station1]:
+            if child[0] == station2:
                 return child
     
     
-    def getShortestPaths(self, sourceNode, destinationNode, constraint=3):
+    def getStationFromName(self, stationName):
         """
-        Gives n-shortest paths between two given nodes, where n is given (3 by default).
+        Gives a station whose name is provided.
         
         Requires:
-        sourceNode, destinationNode Node
+        stationName str
+        
+        Ensures:
+        station Station
+        """
+        for station in self._stations:
+            if station.getName() == stationName:
+                return station
+    
+    
+    def getShortestPaths(self, sourceStation, destinationStation, constraint=3):
+        """
+        Gives n-shortest paths between two given stations, where n is given (3 by default).
+        
+        Requires:
+        sourceStation, destinationStation Station
         constraint int
+        
         Ensures:
         first n-shortest paths, where n is equal to the given constraint 
         """
-        
-        def isWeightEligible(weight, allPaths):
+           
+        def isWeightElligible(weight, allPaths):
             """
-            Returns whether a given weight is lower than any of the paths
-            in given, i.e. it can be added to the list.
+            Returns whether a given weight is lower than the last path 
+            in allPaths (i.e. the heaviest, since allPaths is sorted beforehand)
             
             Requires:
             weight int
-            allPaths a list of paths (tuples of (path, weight))
+            allPaths list
+            
             Ensures:
-            True if weight is lower than any of the paths, else returns False
-            """
-            for path in allPaths:
-                if weight < path[PATH_WEIGHT_INDEX]:
-                    return True
+            true, if weight is "elligible"
+            false, in case it's not
+            """           
+            
+            if weight < allPaths[-1][PATH_WEIGHT_INDEX]:
+                return True
             return False
         
         
-        def heaviestPath(allPaths):
+        def dfs(currentStation, targetStation, currentPath, pathWeight, allPaths, maxPaths): 
             """
-            Gives the heaviest path in a list of paths.
-            
-            Requires: 
-            allPaths a list of paths (tuples of (path, weight))
-            Ensures:
-            a tuple (path, weight) which is the heaviest path in the allPaths list
-            """
-            heaviest = None
-            for path in allPaths:
-                if heaviest == None:
-                    heaviest = path
-                elif path[PATH_WEIGHT_INDEX] > heaviest[PATH_WEIGHT_INDEX]:
-                    heaviest = path
-            return heaviest                
-        
-        
-        def dfs(currentNode, targetNode, path, pathWeight, allPaths, maxPaths): 
-            """
-            Gives n-shortest paths between two given nodes, where n is given (3 by default).
+            Gives n-shortest paths between two given stations, where n is given (3 by default).
             
             Requires:
-            currentNode, targetNode Station
-            path, allPaths list
+            currentStation, targetStation Station
+            currentPath, allPaths list
             pathWeight, maxPaths int
+            
             Ensures:
             first n-shortest paths, where n is equal to the given maxPaths 
             """
-            path = path + [currentNode]
+            currentPath = currentPath + [currentStation]
             
-            # if the current path has at least 2 nodes, get the edge of the previous node with the current node
-            # and add this edge's weight to pathWeight
-            if len(path) > 1:
-                previousNodeEdges = self._edges[path[-2]]
-                currentEdge = None
-                for edge in previousNodeEdges:
-                    if edge[EDGE_NODE_INDEX] == currentNode:
-                        currentEdge = edge
-                pathWeight += currentEdge[EDGE_WEIGHT_INDEX]
-                         
-            if currentNode == targetNode:
-                return (path, pathWeight)
+            # if currentPath has at least 2 stations, gets the levada of the previous station with the current station
+            # and adds this levada's weight to pathWeight
+            if len(currentPath) > 1:
+                previousNodeLevadas = self._levadas[currentPath[-2]]
+                currentLevada = None
+                for levada in previousNodeLevadas:
+                    if levada[LEVADA_NODE_INDEX] == currentStation:
+                        currentLevada = levada
+                pathWeight += currentLevada[LEVADA_WEIGHT_INDEX]
+            
+            if currentStation == targetStation:
+                return (currentPath, pathWeight)
                 
             
-            # if reached a childless node which is not the target node
-            elif len(self.childrenOf(currentNode)) == 0:
+            # if reached a childless station which is not the target station
+            elif len(self.childrenOf(currentStation)) == 0:
                 return None
             
-            for node in self.childrenOf(currentNode):
-                if node not in path:  
-                    if len(allPaths) < maxPaths or (len(allPaths) == maxPaths and isWeightEligible(pathWeight, allPaths)):
+            for station in self.childrenOf(currentStation):
+                if station not in currentPath:  
+                    if len(allPaths) < maxPaths or isWeightElligible(pathWeight, allPaths):
                         
                         # recursion
-                        newPath = (dfs(node, targetNode, path, pathWeight, deepcopy(allPaths), maxPaths))
+                        newPath = (dfs(station, targetStation, currentPath, pathWeight, deepcopy(allPaths), maxPaths))
                         if newPath != None:
-                            # if newPath is a tuple (i.e. a path found)
+                            # if newPath is a tuple (i.e. a currentPath found)
                             if isinstance(newPath, tuple):
-                                # check whether amount of paths found until now is lower than constraint or, in case it isn't, if weight is eligible to be added 
-                                if len(allPaths) < maxPaths or (len(allPaths) == maxPaths and isWeightEligible(newPath[1], allPaths)):
-                                    if len(allPaths) == maxPaths:
-                                        allPaths.remove(heaviestPath(allPaths))  
+                                # check whether amount of paths found until now is lower than constraint or, in case it isn't, if currentPath can be added 
+                                if len(allPaths) < maxPaths or isWeightElligible(newPath[PATH_WEIGHT_INDEX], allPaths):
+                                    if len(allPaths) == maxPaths: 
+                                        allPaths.pop()
+                                        
                                     allPaths.append(newPath)
+                                    allPaths.sort(key = lambda currentPath: (currentPath[PATH_WEIGHT_INDEX], -len(currentPath[PATH_LIST_INDEX]), currentPath[PATH_LIST_INDEX][1].getName()))
                             else:
                                 allPaths = newPath 
             return allPaths
-    
 
-        #TODO ver isso aqui melhor (não sei onde exatamente que é pra guardar a informação de que eles não comunicam)
-        results = dfs(sourceNode, destinationNode, [], 0, [], constraint)        
-        #if len(results) == 0:
-            #raise Exception(f"{sourceNode.getName()} and {destinationNode.getName()} do not communicate")
+        results = dfs(sourceStation, destinationStation, [], 0, [], constraint)        
+        if len(results) == 0:
+            return f"{sourceStation.getName()} and {destinationStation.getName()} do not communicate"
         
-        results.sort(key = lambda path: path[PATH_WEIGHT_INDEX])
-        results = [([node.getName() for node in path[PATH_LIST_INDEX]], path[PATH_WEIGHT_INDEX]) for path in results]
+        # changes the stations objects for their names to be shown in the list
+        results = [ ([station.getName() for station in currentPath[PATH_LIST_INDEX]], currentPath[PATH_WEIGHT_INDEX]) for currentPath in results ]
         return results
-        
 
+    
     def __str__(self):
-        finalStr = "Adjacency Matrix:\n/   "
-        dictKeys = [k for k in self._edges.keys()]
-        nodes = self._nodes
+        """
+        String representation as an adjacency matrix of the network.
+        """
         
-        for node in nodes:
-            finalStr += f"{node.getId()}   "
+        finalStr = "Adjacency Matrix:\n/   "
+        stations = self._stations
+        
+        for station in stations:
+            finalStr += f"{station.getId()}   "
         finalStr += "\n"
         
-        for row in range(0, len(nodes)):
+        for row in range(0, len(stations)):
             weightToPrint = 0
-            for column in range(-1, len(nodes)):
+            for column in range(-1, len(stations)):
                 if column == -1:        
-                    finalStr += f"{nodes[row].getId()}   "
+                    finalStr += f"{stations[row].getId()}   "
                 else:
-                    edge = self.getEdgeBewteenNodes(nodes[row], nodes[column])
-                    weightToPrint = edge[1]
+                    levada = self.getLevadaBetweenStations(stations[row], stations[column])
+                    weightToPrint = levada[1]
                     finalStr += f"{weightToPrint}   "
             finalStr += "\n"
         return finalStr
-                    
-                
-
-

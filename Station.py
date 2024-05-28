@@ -1,29 +1,10 @@
-#-*- coding: utf-8 -*-
-
-# 2023-2024 Programação 2 (LTI)
-# Grupo 143
-# 62220 Libero Suprani 
-# 62239 Lourenço Lima
-
 class Station:
     def __init__(self, id, name, children=[]):
         self._id = id
         self._name = name
         
-        # children é uma lista com tuplos (nóFilho, distância)
+        # children is a list with tuples (childStation, distance)
         self._children = children
-
-    # TODO gets a station from the info in a file
-    def fromFile(fileName):
-        """
-        Constructs a station from the info in a file.
-        
-        Requires:
-        fileName str
-        Ensures:
-        The synchronization of this station's info with the info from the file given
-        """
-        pass
 
 
     def getId(self):

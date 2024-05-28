@@ -1,125 +1,99 @@
-#-*- coding: utf-8 -*-
-
-# 2023-2024 Programação 2 (LTI)
-# Grupo 143
-# 62220 Libero Suprani 
-# 62239 Lourenço Lima
-
 import sys
+from constants import * 
 from Network import Network
-from Station import Station
-from Edge import Edge
-
-def calcPaths(dic, paths):
-    
-    """
-    This makes a list of list with and without stations in the network
-    
-    requires:
-    a 'dic' dictonary, the network of stations
-    
-    ensures:
-    2 list of lists, one with the possible paths with the stations out of network (then with 0 and 1) and
-    other with the only possible paths only
-    """
-    
-    # Inicializa a lista final que vai armazenar os resultados
-    wanted_path_Class = []
-
-    # Itera sobre cada sublista em 'path'
-    for sublist2 in paths:
-        
-        # Inicializa a lista que vai armazenar as classes ou 0/1
-        lista_caminho_Classe = ['0OUT_OF_NETWORK', '1OUT_OF_NETWORK']  # Inicialmente 0 e 1 como fallback
-        
-        # Itera sobre os itens no dicionário 'dic'
-        for item in dic.values():
-            
-            # Verifica se o nome do item corresponde ao primeiro elemento da sublista
-            if item.getName() == sublist2[0]:
-                lista_caminho_Classe[0] = item  # Substitui o 0 pela classe correspondente
-            
-            # Verifica se o nome do item corresponde ao segundo elemento da sublista
-            elif item.getName() == sublist2[1]:
-                lista_caminho_Classe[1] = item  # Substitui o 1 pela classe correspondente
-        
-        # Adiciona a lista preenchida à lista final
-        wanted_path_Class.append(lista_caminho_Classe)
-        
-        wanted_path_Class_no_numbers = [sublist3 for sublist3 in wanted_path_Class if '0OUT_OF_NETWORK' not in sublist3 and '1OUT_OF_NETWORK' not in sublist3]
-    
-    return wanted_path_Class, wanted_path_Class_no_numbers
 
 
-def merge_paths(shortest, paths_with_numbers):
+def readPaths(fileName):
+    '''
+    Gives the information of the wanted paths from a myStationsFile.
     
-    """
-    It merges the numbers (the stations that arent in the network) with the shortest path
-    
-    Requires:
-    shortestPaths, a list of lists with the shortest paths
-    paths_with_numbers, a list of lists with the paths with numbers
+    Requires: 
+    fileName, a str
     
     Ensures:
-    result, a list of lists, merged with the 2 lists
+    a dictionary, where the keys are tuples with (nameOfSourceStation, nameOfDestinationStation) 
+    and the values are empty lists
+    '''
+    out = {}
+    with open(fileName, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+        
+        for line in lines:
+            names = tuple(line.strip().split(' - '))
+            out[names] = []
+    return out
+
+
+def writePaths(wantedPathsDict, fileName):
+    """
+    Writes the results from the paths searches into a file.
+    
+    Requires:
+    wantedPathsDict, dict
+    fileName, str
+    
+    Ensures:
+    The writing of the content in wantedPathsDict into the file whose name is fileName 
     """
     
-    for i, sublist in enumerate(paths_with_numbers):
+    finalStr = ""
+    
+    for key in wantedPathsDict.keys():
+        finalStr += f"# {key[0]} - {key[1]}\n"
         
-        if 'BOTH_OUT_OF_NETWORK' in sublist:
-            shortest.insert(i, sublist)
+        # if value of that key is not a list (i.e. a string such as "out of network" or "same station")
+        if not isinstance(wantedPathsDict[key], list):
+            finalStr += wantedPathsDict[key] + "\n"
+        else:
+            for path in wantedPathsDict[key]:            
+                finalStr += f"{path[PATH_WEIGHT_INDEX]}, "
+                
+                for station in path[PATH_LIST_INDEX]:
+                    finalStr += f"{station}, "
+                finalStr = finalStr.rstrip()
+                finalStr = finalStr[:-1] + "\n"
+                    
+    finalStr = finalStr[:-1]    
+    with open(fileName, "w", encoding="utf-8") as f:
+        f.write(finalStr)
+
+    print(f"TESTE STRING OUTPUT: {finalStr}")
+
+
+def main(levadasNetworkFile, myStationsFile, outputFileName):
+    
+    # creates a network and fill it with the information in levadasNetworkFile
+    levadasNetwork = Network()
+    levadasNetwork.fromFile(levadasNetworkFile)
+    
+    # reads the wanted paths from myStationsFile 
+    wantedPathsDict = readPaths(myStationsFile)
+    
+    for sourceName, destName in wantedPathsDict.keys():
+        result = None
+        networkHasSource = levadasNetwork.hasStation(stationName=sourceName)
+        networkHasDest = levadasNetwork.hasStation(stationName=destName)
         
-        if '0OUT_OF_NETWORK' in sublist or '1OUT_OF_NETWORK' in sublist:
-            shortest.insert(i, sublist)
-    
-    def remove_objects_from_list(lst):
-        cleaned_list = []  # Lista para armazenar os elementos sem objetos
-        for item in lst:
-            if isinstance(item, list):
-                # Se o item for uma lista, chama a função recursivamente para remover objetos dessa lista
-                cleaned_list.append(remove_objects_from_list(item))
-            elif not isinstance(item, Station):
-                # Se o item não for um objeto da classe Station, adiciona à lista limpa
-                cleaned_list.append(item)
-        return cleaned_list
-    
-    return remove_objects_from_list(shortest)
-
-
-
-def main(stationsINPUT, wanted_pathsINTPUT, output):
-
-    """
-    main function of safeLevadas
-    
-    requires:
-    stationsINPUT, a str with the path of an .txt file
-    wanted_pathsINPUT,  a str with the path of an .txt file
-    output, a str with the path for the .txt file
-    
-    ensures:
-    an .txt file, with 'output' at his path
-    """
-    
-    n = Network()
-    networkDic = n.fromFile(stationsINPUT)    
-    wanted_path = Edge.fromFileEdges(wanted_pathsINTPUT)
-    
-    paths, possiblePaths = calcPaths(networkDic, wanted_path)
-
-    for i, sublist5 in enumerate(paths):
-        if '0OUT_OF_NETWORK' in sublist5 and '1OUT_OF_NETWORK' in sublist5:
-            out = 'BOTH_OUT_OF_NETWORK'
-            paths[i] = [out]
-
-    finalList = []
-    for sublist4 in possiblePaths:
-        pathList = n.getShortestPaths(sublist4[0], sublist4[1])
-        finalList.append(pathList)
-    
-    merged_final = merge_paths(finalList, paths)
-    n.writeFile(wanted_path, merged_final, output)
+        if sourceName == destName:
+            result = "Same station. 0 minutes."
+            
+        elif networkHasSource and networkHasDest:
+            sourceNode = levadasNetwork.getStationFromName(sourceName)
+            destNode = levadasNetwork.getStationFromName(destName)
+            result = levadasNetwork.getShortestPaths(sourceNode, destNode)   
+        else:
+            result = ""
+            if not networkHasDest:
+                result = f"{destName} out of the network"
+                if not networkHasSource:
+                    result = f"{sourceName} and {result}"
+            else:
+                result = f"{sourceName} out of the network"
         
+        wantedPathsDict[(sourceName, destName)] = result    
+      
+    writePaths(wantedPathsDict, outputFileName)
+                
+    print(f"TESTE LISTA DE ADJACENCIA: {levadasNetwork}")
+                
 main(sys.argv[1], sys.argv[2], sys.argv[3])
-
-#python safeLevadas.py ficheiros_entrada/stationsTESTE.txt ficheiros_entrada/wantedPathsTESTE.txt ficheiros_saida/outputTESTE.txt
