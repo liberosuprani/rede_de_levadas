@@ -1,3 +1,8 @@
+# 2023-2024 Programação 2 LTI
+# Grupo 54
+# 62220 Libero Suprani
+# 62239 Lourenço Lima
+
 import sys
 from constants import * 
 from Network import Network
