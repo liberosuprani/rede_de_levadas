@@ -131,7 +131,7 @@ class Network:
         Requires:
         station is station already in the network
         Ensures:
-        list containing all the children of station
+        list containing all of the stations that are children of the given station
         """
         return [x[LEVADA_NODE_INDEX] for x in self._levadas[station]]
     
@@ -160,6 +160,23 @@ class Network:
             raise Exception("No arguments were provided")
     
     
+    def getStationFromName(self, stationName):
+        """
+        Gives a station whose name is provided.
+        
+        Requires:
+        stationName str
+        
+        Ensures:
+        station Station, if station with the given name exists
+        False, if it doesn't exist
+        """
+        for station in self._stations:
+            if station.getName() == stationName:
+                return station
+        return False
+    
+    
     def getLevadaBetweenStations(self, station1, station2):
         """
         Gives levada between two given stations
@@ -178,21 +195,6 @@ class Network:
         for child in self._levadas[station1]:
             if child[0] == station2:
                 return child
-    
-    
-    def getStationFromName(self, stationName):
-        """
-        Gives a station whose name is provided.
-        
-        Requires:
-        stationName str
-        
-        Ensures:
-        station Station
-        """
-        for station in self._stations:
-            if station.getName() == stationName:
-                return station
     
     
     def getShortestPaths(self, sourceStation, destinationStation, constraint=3):
@@ -265,15 +267,17 @@ class Network:
                         # recursion
                         newPath = (dfs(station, targetStation, currentPath, pathWeight, deepcopy(allPaths), maxPaths))
                         if newPath != None:
-                            # if newPath is a tuple (i.e. a currentPath found)
+                            # if newPath is a tuple (i.e. a path was found)
                             if isinstance(newPath, tuple):
-                                # check whether amount of paths found until now is lower than constraint or, in case it isn't, if currentPath can be added 
+                                # check whether the amount of paths found until now is lower than constraint or, in case it isn't, if currentPath can be added 
                                 if len(allPaths) < maxPaths or isWeightElligible(newPath[PATH_WEIGHT_INDEX], allPaths):
                                     if len(allPaths) == maxPaths: 
                                         allPaths.pop()
                                         
                                     allPaths.append(newPath)
                                     allPaths.sort(key = lambda currentPath: (currentPath[PATH_WEIGHT_INDEX], -len(currentPath[PATH_LIST_INDEX]), currentPath[PATH_LIST_INDEX][1].getName()))
+                            # if newPath is not a tuple, then it is a list with the last found path already added to it. 
+                            # That's why it assigns newPath to the allPaths, so it does not add the last found path to it again.
                             else:
                                 allPaths = newPath 
             return allPaths

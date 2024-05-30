@@ -1,0 +1,9 @@
+#Id, Name, Connected:
+A, Primeira, [(B, 1), (C, 2), (H, 5)]
+B, Segunda, [(D, 3), (E, 3)]
+C, Terceira, [(G, 4)]
+D, Quarta, [(F, 4)]
+E, Quinta, [(G, 9)]
+F, Sexta, [(G, 5)]
+G, Sétima, [(H, 4)]
+H, Oitava

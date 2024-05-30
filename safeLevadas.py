@@ -8,7 +8,7 @@ from constants import *
 from Network import Network
 
 
-def readPaths(fileName):
+def readWantedPaths(fileName):
     '''
     Gives the information of the wanted paths from a myStationsFile.
     
@@ -29,7 +29,7 @@ def readPaths(fileName):
     return out
 
 
-def writePaths(wantedPathsDict, fileName):
+def writeFoundPaths(wantedPathsDict, fileName):
     """
     Writes the results from the paths searches into a file.
     
@@ -62,7 +62,6 @@ def writePaths(wantedPathsDict, fileName):
     with open(fileName, "w", encoding="utf-8") as f:
         f.write(finalStr)
 
-    print(f"TESTE STRING OUTPUT: {finalStr}")
 
 
 def main(levadasNetworkFile, myStationsFile, outputFileName):
@@ -72,7 +71,7 @@ def main(levadasNetworkFile, myStationsFile, outputFileName):
     levadasNetwork.fromFile(levadasNetworkFile)
     
     # reads the wanted paths from myStationsFile 
-    wantedPathsDict = readPaths(myStationsFile)
+    wantedPathsDict = readWantedPaths(myStationsFile)
     
     for sourceName, destName in wantedPathsDict.keys():
         result = None
@@ -97,8 +96,7 @@ def main(levadasNetworkFile, myStationsFile, outputFileName):
         
         wantedPathsDict[(sourceName, destName)] = result    
       
-    writePaths(wantedPathsDict, outputFileName)
+    writeFoundPaths(wantedPathsDict, outputFileName)
                 
-    print(f"TESTE LISTA DE ADJACENCIA: {levadasNetwork}")
                 
 main(sys.argv[1], sys.argv[2], sys.argv[3])
