@@ -3,7 +3,9 @@
 # 62220 Libero Suprani
 # 62239 Lourenço Lima
 
-class Levada:
+from codigoOriginal import Edge
+
+class Levada(Edge):
     def __init__(self, src, dest, weight):
         """
         Constructs a Levada
@@ -15,28 +17,13 @@ class Levada:
         Levada such that src == self.getSource(), dest == self.getDestination() 
         and weight == self.getWeight() 
         """
-        self._src = src
-        self._dest = dest
+        super().__init__(src, dest)
         self._weight = weight
-
-        
-    def getSource(self):
-        """
-        Gets the source Station
-        """
-        return self._src
-
-    
-    def getDestination(self):
-        """
-        Gets the destination Station
-        """
-        return self._dest
 
 
     def getWeight(self):
         """
-        Gets the Levada's weight
+        Returns the attribute weight.
         """
         return self._weight
 

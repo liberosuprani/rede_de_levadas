@@ -7,26 +7,10 @@ from copy import deepcopy
 from constants import *
 from Station import Station
 from Levada import Levada
+from codigoOriginal import Graph
 
-class Network:
-    def __init__(self):
-        """
-        Constructs a Network
-        
-        Ensures:
-        empty graph, i.e.
-        graph such that [] == self.getStations() and {} == self.getLevadas() 
-        """
-        self._stations = []
-        self._levadas = {}
-        
-    def getStations(self):
-        return self._stations
+class Network(Graph):
     
-    def getLevadas(self):
-        return self._levadas
-    
-        
     def fromFile(self, fileName):
         '''
         Reads the stations from a file whose name is fileName
@@ -77,23 +61,33 @@ class Network:
                     destinationStation = stationsDictionary[destinationID][0]
                     
                     self.addLevada(Levada(currentStation, destinationStation, distance))
-                
-            
+        
+        
+    def getStations(self):
+        """
+        Returns the attribute nodes.
+        """
+        return self._nodes
+    
+    
+    def getLevadas(self):
+        """
+        Returns the attribute edges.
+        """
+        return self._edges
+    
+                 
     def addStation(self, station):
         """
-        Adds a station
+        Adds a station to the network.
         
         Requires:
-        station is station not in the graph yet
+        station Station
+        
         Ensures:
-        getNodes() == getNodes()@pre.append(station)
-        getLevadas[station] == [] 
+        the addition of station into the network
         """
-        if station in self._stations:
-            raise ValueError('Duplicate station')
-        else:
-            self._stations.append(station)
-            self._levadas[station] = []
+        Graph.addNode(self, station)
 
             
     def addLevada(self, levada):
@@ -109,19 +103,18 @@ class Network:
         dest = levada.getDestination()
         weight = levada.getWeight()
         
-        if not(src in self._stations and dest in self._stations):
+        if not(src in self._nodes and dest in self._nodes):
             raise Exception('Stations not in network')
         
-        # if this levada does not exist yet, then add it to self._levadas
-        if (dest, weight) not in self._levadas[src]:
-            
-            for currentLevada in self._levadas[src]:
+        # if this levada does not exist yet, then add it to self._edges
+        if (dest, weight) not in self._edges[src]:
+            for currentLevada in self._edges[src]:
                 # there is already another levada with the same destination station, but different weight
                 if currentLevada[LEVADA_NODE_INDEX] == dest and currentLevada[LEVADA_WEIGHT_INDEX] != weight:
                     raise Exception(f"Two levadas with same source station and different weights ({Levada(src, dest, currentLevada[LEVADA_WEIGHT_INDEX])}) and ({levada})")
             
-            self._levadas[src].append((dest, weight))
-            self._levadas[dest].append((src, weight))
+            self._edges[src].append((dest, weight))
+            self._edges[dest].append((src, weight))
 
         
     def childrenOf(self, station):
@@ -133,7 +126,7 @@ class Network:
         Ensures:
         list containing all of the stations that are children of the given station
         """
-        return [x[LEVADA_NODE_INDEX] for x in self._levadas[station]]
+        return [x[LEVADA_NODE_INDEX] for x in self._edges[station]]
     
     
     def hasStation(self, station=None, stationName=None):
@@ -150,9 +143,9 @@ class Network:
         """
         
         if station != None:
-            return station in self._stations
+            return Graph.hasNode(station)
         elif stationName != None:
-            for currentStation in self._stations:
+            for currentStation in self._nodes:
                 if currentStation.getName() == stationName:
                     return True
             return False
@@ -171,7 +164,7 @@ class Network:
         station Station, if station with the given name exists
         False, if it doesn't exist
         """
-        for station in self._stations:
+        for station in self._nodes:
             if station.getName() == stationName:
                 return station
         return False
@@ -192,7 +185,7 @@ class Network:
         if station2 not in self.childrenOf(station1):
             return (0, 0)
         
-        for child in self._levadas[station1]:
+        for child in self._edges[station1]:
             if child[0] == station2:
                 return child
     
@@ -216,13 +209,12 @@ class Network:
             
             Requires:
             weight int
-            allPaths list
+            allPaths list (already sorted by lower to greater weight)
             
             Ensures:
             true, if weight is "elligible"
             false, in case it's not
             """           
-            
             if weight < allPaths[-1][PATH_WEIGHT_INDEX]:
                 return True
             return False
@@ -245,25 +237,22 @@ class Network:
             # if currentPath has at least 2 stations, gets the levada of the previous station with the current station
             # and adds this levada's weight to pathWeight
             if len(currentPath) > 1:
-                previousNodeLevadas = self._levadas[currentPath[-2]]
+                previousStationLevadas = self._edges[currentPath[-2]]
                 currentLevada = None
-                for levada in previousNodeLevadas:
+                for levada in previousStationLevadas:
                     if levada[LEVADA_NODE_INDEX] == currentStation:
                         currentLevada = levada
                 pathWeight += currentLevada[LEVADA_WEIGHT_INDEX]
             
             if currentStation == targetStation:
                 return (currentPath, pathWeight)
-                
-            
             # if reached a childless station which is not the target station
             elif len(self.childrenOf(currentStation)) == 0:
                 return None
             
             for station in self.childrenOf(currentStation):
                 if station not in currentPath:  
-                    if len(allPaths) < maxPaths or isWeightElligible(pathWeight, allPaths):
-                        
+                    if len(allPaths) < maxPaths or isWeightElligible(pathWeight, allPaths):      
                         # recursion
                         newPath = (dfs(station, targetStation, currentPath, pathWeight, deepcopy(allPaths), maxPaths))
                         if newPath != None:
@@ -272,8 +261,7 @@ class Network:
                                 # check whether the amount of paths found until now is lower than constraint or, in case it isn't, if currentPath can be added 
                                 if len(allPaths) < maxPaths or isWeightElligible(newPath[PATH_WEIGHT_INDEX], allPaths):
                                     if len(allPaths) == maxPaths: 
-                                        allPaths.pop()
-                                        
+                                        allPaths.pop()     
                                     allPaths.append(newPath)
                                     allPaths.sort(key = lambda currentPath: (currentPath[PATH_WEIGHT_INDEX], -len(currentPath[PATH_LIST_INDEX]), currentPath[PATH_LIST_INDEX][1].getName()))
                             # if newPath is not a tuple, then it is a list with the last found path already added to it. 
@@ -290,6 +278,10 @@ class Network:
         results = [ ([station.getName() for station in currentPath[PATH_LIST_INDEX]], currentPath[PATH_WEIGHT_INDEX]) for currentPath in results ]
         return results
 
+
+    def __eq__(self, o):
+        return (self._nodes == o.getStations() and self._edges == o.getLevadas())
+
     
     def __str__(self):
         """
@@ -297,7 +289,7 @@ class Network:
         """
         
         finalStr = "Adjacency Matrix:\n/   "
-        stations = self._stations
+        stations = self._nodes
         
         for station in stations:
             finalStr += f"{station.getId()}   "
