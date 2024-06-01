@@ -202,7 +202,7 @@ class Network(Graph):
         first n-shortest paths, where n is equal to the given constraint 
         """
            
-        def isWeightElligible(weight, allPaths):
+        def isPathElligible(currentPath, allPaths):
             """
             Returns whether a given weight is lower than the last path 
             in allPaths (i.e. the heaviest, since allPaths is sorted beforehand)
@@ -214,9 +214,24 @@ class Network(Graph):
             Ensures:
             true, if weight is "elligible"
             false, in case it's not
-            """           
-            if weight < allPaths[-1][PATH_WEIGHT_INDEX]:
+            """     
+            
+            currentPathWeight = currentPath[PATH_WEIGHT_INDEX]
+            lastPathWeight = allPaths[-1][PATH_WEIGHT_INDEX]
+            
+            currentPathList = currentPath[PATH_LIST_INDEX]
+            lastPathList = allPaths[-1][PATH_LIST_INDEX]
+                  
+            if currentPathWeight < lastPathWeight: 
                 return True
+            
+            if currentPathWeight == lastPathWeight:
+                if len(currentPathList) > len(lastPathList):
+                    return True
+                if len(currentPathList) == len(lastPathList):
+                    if currentPathList[1].getName() < lastPathList[1].getName():
+                        return True
+                     
             return False
         
         
@@ -252,14 +267,14 @@ class Network(Graph):
             
             for station in self.childrenOf(currentStation):
                 if station not in currentPath:  
-                    if len(allPaths) < maxPaths or isWeightElligible(pathWeight, allPaths):      
+                    if len(allPaths) < maxPaths or isPathElligible((currentPath, pathWeight), allPaths):      
                         # recursion
                         newPath = (dfs(station, targetStation, currentPath, pathWeight, deepcopy(allPaths), maxPaths))
                         if newPath != None:
                             # if newPath is a tuple (i.e. a path was found)
                             if isinstance(newPath, tuple):
                                 # check whether the amount of paths found until now is lower than constraint or, in case it isn't, if currentPath can be added 
-                                if len(allPaths) < maxPaths or isWeightElligible(newPath[PATH_WEIGHT_INDEX], allPaths):
+                                if len(allPaths) < maxPaths or isPathElligible(newPath, allPaths):
                                     if len(allPaths) == maxPaths: 
                                         allPaths.pop()     
                                     allPaths.append(newPath)
