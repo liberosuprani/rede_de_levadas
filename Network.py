@@ -204,15 +204,15 @@ class Network(Graph):
            
         def isPathElligible(currentPath, allPaths):
             """
-            Returns whether a given weight is lower than the last path 
-            in allPaths (i.e. the heaviest, since allPaths is sorted beforehand)
+            Returns whether a given path is able to be added to the allPaths list 
+            (allPaths has to be sorted beforehand)
             
             Requires:
-            weight int
-            allPaths list (already sorted by lower to greater weight)
+            currentPath tuple (pathList, pathWeight)
+            allPaths list (already sorted according to the specification)
             
             Ensures:
-            true, if weight is "elligible"
+            true, if path is "elligible"
             false, in case it's not
             """     
             
@@ -271,7 +271,7 @@ class Network(Graph):
                         # recursion
                         newPath = (dfs(station, targetStation, currentPath, pathWeight, deepcopy(allPaths), maxPaths))
                         if newPath != None:
-                            # if newPath is a tuple (i.e. a path was found)
+                            # if newPath is a tuple (i.e. a path was just found)
                             if isinstance(newPath, tuple):
                                 # check whether the amount of paths found until now is lower than constraint or, in case it isn't, if currentPath can be added 
                                 if len(allPaths) < maxPaths or isPathElligible(newPath, allPaths):
