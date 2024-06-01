@@ -61,4 +61,4 @@ class Station(Node):
 
 
     def __str__(self):
-        return f"[Id: {self.getId()}, Name: {self.getName()}]"
+        return f"{self.getId()}, {super().__str__()}"
