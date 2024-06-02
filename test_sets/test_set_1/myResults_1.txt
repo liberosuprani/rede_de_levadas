@@ -1,0 +1,12 @@
+# Primeira - Décima
+Décima out of the network
+# Nona - Décima
+Nona and Décima out of the network
+# Segunda - Terceira
+3, Segunda, Primeira, Terceira
+14, Segunda, Primeira, Oitava, Sétima, Terceira
+16, Segunda, Quarta, Sexta, Sétima, Terceira
+# Segunda - Quarta
+3, Segunda, Quarta
+16, Segunda, Primeira, Terceira, Sétima, Sexta, Quarta
+19, Segunda, Primeira, Oitava, Sétima, Sexta, Quarta

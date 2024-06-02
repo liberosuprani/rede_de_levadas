@@ -6,8 +6,7 @@
 import sys
 from constants import * 
 from Network import Network
-from Itinerary import Itinerary
-import FileHandling 
+from ItineraryList import ItineraryList
 
 def main(levadasNetworkFile, myStationsFile, outputFile):
     """
@@ -26,36 +25,11 @@ def main(levadasNetworkFile, myStationsFile, outputFile):
     levadasNetwork.fromFile(levadasNetworkFile)
     
     # reads the wanted itineraries from myStationsFile 
-    itineraries = FileHandling.readItineraries(myStationsFile)
-    
-    for currentItinerary in itineraries:
-        title = currentItinerary.getTitle()
-        sourceStation = title[0]
-        destinationStation = title[1]
-        
-        result = None
-        networkHasSource = levadasNetwork.hasStation(stationName=sourceStation)
-        networkHasDestination = levadasNetwork.hasStation(stationName=destinationStation)
-        
-        if sourceStation == destinationStation:
-            result = "Same station. 0 minutes."
-            
-        elif networkHasSource and networkHasDestination:
-            sourceNode = levadasNetwork.getStationFromName(sourceStation)
-            destNode = levadasNetwork.getStationFromName(destinationStation)
-            result = levadasNetwork.getShortestPaths(sourceNode, destNode)  
-        else:
-            result = ""
-            if not networkHasDestination:
-                result = f"{destinationStation} out of the network"
-                if not networkHasSource:
-                    result = f"{sourceStation} and {result}"
-            else:
-                result = f"{sourceStation} out of the network"
-        
-        currentItinerary.setAllPaths(result)     
-      
-    FileHandling.writeItineraries(itineraries, outputFile)
+    itineraries = ItineraryList(myStationsFile)    
+     
+    # updares the itineraries' data based on the network 
+    itineraries.updateData(levadasNetwork) 
+    itineraries.toFile(outputFile)
                          
 
 main(sys.argv[1], sys.argv[2], sys.argv[3])

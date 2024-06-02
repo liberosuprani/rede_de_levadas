@@ -29,7 +29,8 @@ class Levada(Edge):
 
 
     def __eq__(self, o):
-        return (self.getDestination() == o.getDestination() and self.getSource() == o.getSource() and self.getWeight() == o.getWeight())
+        return (self.getDestination() == o.getDestination() and self.getSource() == o.getSource() 
+                and self.getWeight() == o.getWeight())
 
 
     def __str__(self):

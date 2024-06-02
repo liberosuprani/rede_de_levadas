@@ -44,8 +44,10 @@ class Network(Graph):
                 station = Station(tempStation[0], tempStation[1], [])
                 self.addStation(station)
                 
-                # dictionary key is the ID of a station, and the value is a tuple (stationObject, listOfChildrenToBeAdded)
-                stationsDictionary[tempStation[0]] = (station, tempStation[2])
+                # dictionary key is the ID of a station, 
+                # and the value is a tuple (stationObject, listOfChildrenToBeAdded)
+                stationId = tempStation[0]
+                stationsDictionary[stationId] = (station, tempStation[2])
         
             for currentID in stationsDictionary.keys():
                 
@@ -58,8 +60,11 @@ class Network(Graph):
                     distance = child[LEVADA_WEIGHT_INDEX]
                     
                     # gets the station Object from its ID key in the dictionary
-                    destinationStation = stationsDictionary[destinationID][0]
-                    
+                    try:
+                        destinationStation = stationsDictionary[destinationID][0]
+                    except:
+                        print(f"There was no info from a station with the ID={destinationID} provided\n") 
+                        
                     self.addLevada(Levada(currentStation, destinationStation, distance))
         
         
@@ -111,7 +116,8 @@ class Network(Graph):
             for currentLevada in self._edges[src]:
                 # there is already another levada with the same destination station, but different weight
                 if currentLevada[LEVADA_NODE_INDEX] == dest and currentLevada[LEVADA_WEIGHT_INDEX] != weight:
-                    raise Exception(f"Two levadas with same source station and different weights ({Levada(src, dest, currentLevada[LEVADA_WEIGHT_INDEX])}) and ({levada})")
+                    raise Exception(f"Two levadas with same source station and different weights \
+                                    ({Levada(src, dest, currentLevada[LEVADA_WEIGHT_INDEX])}) and ({levada})")
             
             self._edges[src].append((dest, weight))
             self._edges[dest].append((src, weight))
@@ -273,12 +279,15 @@ class Network(Graph):
                         if newPath != None:
                             # if newPath is a tuple (i.e. a path was just found)
                             if isinstance(newPath, tuple):
-                                # check whether the amount of paths found until now is lower than constraint or, in case it isn't, if currentPath can be added 
+                                # check whether the amount of paths found until now is lower than constraint or, in case it isn't, 
+                                # if currentPath can be added 
                                 if len(allPaths) < maxPaths or isPathElligible(newPath, allPaths):
                                     if len(allPaths) == maxPaths: 
                                         allPaths.pop()     
                                     allPaths.append(newPath)
-                                    allPaths.sort(key = lambda currentPath: (currentPath[PATH_WEIGHT_INDEX], -len(currentPath[PATH_LIST_INDEX]), currentPath[PATH_LIST_INDEX][1].getName()))
+                                    allPaths.sort(key = lambda currentPath: (currentPath[PATH_WEIGHT_INDEX], 
+                                                                             -len(currentPath[PATH_LIST_INDEX]), 
+                                                                             currentPath[PATH_LIST_INDEX][1].getName()))
                             # if newPath is not a tuple, then it is a list with the last found path already added to it. 
                             # That's why it assigns newPath to the allPaths, so it does not add the last found path to it again.
                             else:
@@ -290,7 +299,8 @@ class Network(Graph):
             return f"{sourceStation.getName()} and {destinationStation.getName()} do not communicate"
         
         # changes the stations objects for their names to be shown in the list
-        results = [ ([station.getName() for station in currentPath[PATH_LIST_INDEX]], currentPath[PATH_WEIGHT_INDEX]) for currentPath in results ]
+        results = [ ([station.getName() for station in currentPath[PATH_LIST_INDEX]], 
+                     currentPath[PATH_WEIGHT_INDEX]) for currentPath in results ]
         return results
 
 

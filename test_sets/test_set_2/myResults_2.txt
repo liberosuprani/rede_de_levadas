@@ -1,0 +1,8 @@
+# Primeira - Nona
+Primeira and Nona do not communicate
+# Décima - Nona
+4, Décima, Nona
+# Primeira - Sétima
+9, Primeira, Oitava, Sétima
+9, Primeira, Terceira, Sétima
+13, Primeira, Segunda, Quarta, Sexta, Sétima

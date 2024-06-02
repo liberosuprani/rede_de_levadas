@@ -1,0 +1,24 @@
+# Primeira - Sexta
+64, Primeira, Terceira, Quinta, Sexta
+72, Primeira, Segunda, Quarta, Quinta, Sexta
+72, Primeira, Segunda, Quinta, Sexta
+# Primeira - Segunda
+21, Primeira, Segunda
+51, Primeira, Terceira, Quinta, Quarta, Segunda
+51, Primeira, Terceira, Quinta, Segunda
+# Primeira - Quarta
+35, Primeira, Segunda, Quarta
+37, Primeira, Terceira, Quinta, Quarta
+45, Primeira, Segunda, Quinta, Quarta
+# Primeira - Areeiro
+Areeiro out of the network
+# Segunda - Oitava
+Segunda and Oitava do not communicate
+# Sétima - Oitava
+29, Sétima, Nona, Oitava
+# Oitava - Sétima
+29, Oitava, Nona, Sétima
+# Sétima - Nona
+25, Sétima, Nona
+# Oitava - Nona
+4, Oitava, Nona

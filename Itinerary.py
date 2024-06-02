@@ -6,19 +6,19 @@
 from constants import *
 
 class Itinerary:
-    def __init__(self, title, allPaths=[]):
+    def __init__(self, title, route=[]):
         """
         Constructs a Itinerary
         
         Requires:
         title tuple (sourceStationName, destinationStationName)
-        allPaths list of tuples (pathList, pathWeight), (default value = [])
+        route list of tuples (pathList, pathWeight), (default value = [])
         Ensures:
-        Itinerary such that title == self.getTitle() and allPaths == self.getAllPaths() 
+        Itinerary such that title == self.getTitle() and route == self.getAllPaths() 
         """
         self._title = title
-        self._allPaths = allPaths
-        
+        self._route = route
+         
     
     def getTitle(self):
         """
@@ -26,36 +26,38 @@ class Itinerary:
         """
         return self._title
     
+    
     def setTitle(self, title):
         """
-        Sets the attribute allPaths.
+        Sets the attribute route.
         """
         self._title = title
     
     
-    def getAllPaths(self):
+    def getRoute(self):
         """
-        Returns the attribute allPaths.
+        Returns the attribute route.
         """
-        return self._allPaths
+        return self._route
     
-    def setAllPaths(self, allPaths):
+    
+    def setRoute(self, route):
         """
-        Sets the attribute allPaths.
+        Sets the attribute route.
         """
-        self._allPaths = allPaths
+        self._route = route
         
-        
+            
     def __str__(self):
         """
         String representation.
         """
         finalStr = f"# {self._title[0]} - {self._title[1]}\n"
         
-        if isinstance(self._allPaths, str):
-            finalStr += f"{self._allPaths}"
+        if isinstance(self._route, str):
+            finalStr += f"{self._route}"
         else:    
-            for currentPath in self._allPaths:
+            for currentPath in self._route:
                 finalStr += f"{currentPath[PATH_WEIGHT_INDEX]}, "
 
                 for station in currentPath[PATH_LIST_INDEX]:
